@@ -81,9 +81,9 @@ This creates:
 models/next_week_model.joblib
 
 **Running the App**
-- Start Streamlit
-From the project root:
-streamlit run app/streamlit_app.py
-Open the local URL shown in the terminal.
+- Start Streamlit 
+- From the project root: streamlit run app/streamlit_app.py
+- Open the local URL shown in the terminal.
+
 
 
