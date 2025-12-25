@@ -1,9 +1,9 @@
 from engine.loading_data.load import load_weekly_csv, build_weekly_indexes, get_season_week_range
-from simulator.simulate import Trade, counterfactual_replay
+from engine.simulator.simulate import Trade, counterfactual_replay
 
 def main():
     #1 let's load + index data
-    df = load_weekly_csv("data/weekly.csv")
+    df = load_weekly_csv("dataset/weekly.csv")
     points_index, pos_index, name_by_id = build_weekly_indexes(df)
 
     #2 choose a season and week range

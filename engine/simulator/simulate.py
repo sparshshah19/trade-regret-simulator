@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Dict, Tuple, Optional
-from simulator.lineup import optimal_lineup_points
+from engine.simulator.lineup import optimal_lineup_points
 
 
 @dataclass(frozen=True)

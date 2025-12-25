@@ -1,7 +1,5 @@
 import pandas as pd
 
-import pandas as pd
-
 def load_weekly_csv(path: str = "dataset/weekly.csv") -> pd.DataFrame:
     df = pd.read_csv(path)
 

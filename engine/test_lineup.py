@@ -1,6 +1,6 @@
 #testing the lineup functionality
 
-from simulator.lineup import optimal_lineup_points
+from engine.simulator.lineup import optimal_lineup_points
 
 roster_points = {
     "qb1": 22, "rb1": 18, "rb2": 10, "rb3": 6,

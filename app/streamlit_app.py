@@ -7,7 +7,6 @@ if str(root) not in sys.path:
     sys.path.insert(0, str(root))
 
 import streamlit as st
-import pandas as pd
 import matplotlib.pyplot as plt
 
 from engine.loading_data.load import load_weekly_csv, build_weekly_indexes, get_season_week_range
@@ -17,6 +16,7 @@ from engine.ml.predict import load_model
 from engine.simulator.expected import simulate_expected_points
 
 data_path = "dataset/weekly.csv"
+model_path = "models/next_week_model.joblib"
 
 @st.cache_data #caches function outputs. so the function of load_data, the outputs of this function will be cached, sort of stored in the database
 def load_data():
@@ -24,7 +24,7 @@ def load_data():
 
 @st.cache_resource #caches long-lived resources such as ml models
 def load_ml_model():
-    return load_model("models/next_week_model.joblib")
+    return load_model(model_path)
 
 def plot_lines(x, y1, y2, label1, label2, title):
     fig = plt.figure()
@@ -46,12 +46,23 @@ def main():
     st.title("TradeZone — Trade Regret Simulator + ML")
 
     df = load_data()
+    st.write("Data loaded!")
 
     seasons = sorted(df["season"].unique())
     season = st.selectbox("Season", seasons, index=len(seasons) - 1)
+    season = int(season)
 
     min_w, max_w = get_season_week_range(df, season)
-    trade_week = st.slider("Trade week", min_value=min_w, max_value=max_w - 1, value=min(6, max_w - 1))
+
+    # Cap to fantasy weeks (most leagues end by Week 17; Week 18 is regular season but often avoided)
+    end_week_cap = min(int(max_w), 17)
+
+    trade_week = st.slider(
+        "Trade week",
+        min_value=int(min_w),
+        max_value=int(end_week_cap) - 1,  # trade must happen before end week
+        value=max(int(min_w), 6),
+    )
 
     mode = st.radio(
         "Mode",
@@ -65,7 +76,6 @@ def main():
         .set_index("player_name")["player_id"]
         .to_dict()
     )
-
     all_names = sorted(name_to_id.keys())
 
     st.subheader("Roster")
@@ -95,22 +105,28 @@ def main():
                 trade=trade,
                 points_index=points_index,
                 pos_index=pos_index,
-                season=int(season),
-                end_week=int(max_w),
+                season=season,
+                end_week=end_week_cap,
             )
 
-            weeks = list(range(trade_week, max_w + 1))
+            weekly_with = res["weekly_with_trade"]
+            weekly_without = res["weekly_without_trade"]
+            cumulative = res["cumulative_delta"]
+
+            # IMPORTANT: build x-axis to match returned y length
+            weeks = list(range(int(trade_week), int(trade_week) + len(weekly_with)))
+
             st.write("Total delta points:", round(res["total_delta"], 2))
 
             plot_lines(
                 weeks,
-                res["weekly_with_trade"],
-                res["weekly_without_trade"],
+                weekly_with,
+                weekly_without,
                 "With trade",
                 "Without trade",
-                "Weekly Points"
+                "Weekly Points (Historical)",
             )
-            plot_cumulative(weeks, res["cumulative_delta"], "Cumulative Regret")
+            plot_cumulative(weeks, cumulative, "Cumulative Regret (Historical)")
 
         else:
             model = load_ml_model()
@@ -118,4 +134,50 @@ def main():
             roster_without = roster_ids.copy()
             roster_with = apply_trade_to_roster(roster_ids, trade)
 
-            weekly_without, _ = simulate_expected_points(model=model, history_df=df, roster=roster_without)
+            weekly_without, _ = simulate_expected_points(
+                model=model,
+                history_df=df,
+                roster_ids=roster_without,
+                season=season,
+                start_week=int(trade_week),
+                end_week=end_week_cap,  # cap here too
+                optimal_lineup_fn=optimal_lineup_points,
+            )
+
+            weekly_with, _ = simulate_expected_points(
+                model=model,
+                history_df=df,
+                roster_ids=roster_with,
+                season=season,
+                start_week=int(trade_week),
+                end_week=end_week_cap,  # cap here too
+                optimal_lineup_fn=optimal_lineup_points,
+            )
+
+            weekly_delta = [w - wo for w, wo in zip(weekly_with, weekly_without)]
+            cumulative = []
+            run = 0.0
+            for d in weekly_delta:
+                run += d
+                cumulative.append(run)
+
+            # IMPORTANT: build x-axis to match returned y length
+            weeks = list(range(int(trade_week), int(trade_week) + len(weekly_with)))
+
+            if cumulative:
+                st.write("Expected total delta points:", round(cumulative[-1], 2))
+            else:
+                st.write("Expected total delta points: N/A (no weeks returned)")
+
+            plot_lines(
+                weeks,
+                weekly_with,
+                weekly_without,
+                "With trade (expected)",
+                "Without trade (expected)",
+                "Expected Weekly Points",
+            )
+            plot_cumulative(weeks, cumulative, "Expected Cumulative Regret")
+
+if __name__ == "__main__":
+    main()

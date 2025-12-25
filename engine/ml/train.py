@@ -8,6 +8,7 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.impute import SimpleImputer
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.metrics import r2_score
 
 from engine.ml.features import make_features
 
@@ -62,17 +63,46 @@ def main():
 
     preds = pipe.predict(X_test)
 
+    baseline_preds = X_test["lag1_points"].values
+
+    baseline_mae = mean_absolute_error(y_test, baseline_preds)
+    baseline_rmse = mean_squared_error(y_test, baseline_preds) ** 0.5
+
     mae = mean_absolute_error(y_test, preds)
     rmse = mean_squared_error(y_test, preds) ** 0.5
+    mae_improvement = (baseline_mae - mae) / baseline_mae * 100
+    r2 = r2_score(y_test, preds)
+
+    print("\n=== Model Evaluation (Next-Week Fantasy Points) ===")
 
     print("Train seasons:", train_seasons)
     print("Test seasons:", test_seasons)
-    print("Test MAE:", round(mae, 3))
-    print("Test RMSE:", round(rmse, 3))
+
+    print("\n-- Model Performance --")
+    print("MAE:", round(mae, 3))
+    print("RMSE:", round(rmse, 3))
+    print("R²:", round(r2, 3))
+
+    print("\n-- Baseline (Last Week = Next Week) --")
+    print("Baseline MAE:", round(baseline_mae, 3))
+    print("Baseline RMSE:", round(baseline_rmse, 3))
+
+    print("\n-- Improvement --")
+    print("MAE improvement vs baseline (%):", round(mae_improvement, 1))
+        
 
     os.makedirs("models", exist_ok=True)
     joblib.dump(pipe, model_path)
     print("Saved:", model_path)
 
+    print("\n=== Model Evaluation ===")
+    print("Test MAE:", round(mae, 3))
+    print("Test RMSE:", round(rmse, 3))
+    print("Baseline MAE:", round(baseline_mae, 3))
+    print("Baseline RMSE:", round(baseline_rmse, 3))
+    print("MAE Improvement vs Baseline (%):", round(mae_improvement, 1))
+    print("R²:", round(r2, 3))
+
 if __name__ == "__main__":
     main()
+
