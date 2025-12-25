@@ -1,4 +1,4 @@
-**🏈 TradeZone — Fantasy Football Trade Regret Simulator (with ML)**
+**TradeZone — Fantasy Football Trade Regret Simulator (with ML)**
 
 TradeZone is an end-to-end fantasy football trade analysis system that lets users replay the rest of a season with and without a trade, using either:
 - Historical outcomes (what actually happened), or
@@ -7,7 +7,7 @@ TradeZone is an end-to-end fantasy football trade analysis system that lets user
 The result is a counterfactual regret curve that answers:
 “If I made this trade in Week X, how would my season have changed?”
 
-**🔥 Key Features**
+**Key Features**
 1. Deterministic Historical Replay - Replays the remainder of a season using real weekly fantasy points, and automatically selects the optimal lineup each week:
 
 Outputs: 
@@ -25,36 +25,8 @@ Outputs:
 - Switch between: Historical replay or ML-expected replay
 - Visualize regret over time with plots
 
-📁 Project Structure
-tradezone/
-│
-├── app/
-│   └── streamlit_app.py        # Interactive UI
-│
-├── engine/
-│   ├── loading_data/
-│   │   └── load.py             # Dataset loading + indexing
-│   │
-│   ├── simulator/
-│   │   ├── lineup.py           # Optimal lineup optimizer
-│   │   ├── simulate.py         # Historical counterfactual replay
-│   │   └── expected.py         # ML expected replay
-│   │
-│   └── ml/
-│       ├── features.py         # Feature engineering
-│       ├── train.py            # Model training
-│       └── predict.py          # Model inference
-│
-├── dataset/
-│   └── weekly.csv    # NFL weekly stats (see below) #this is not commited here because the dataset is too big but you will have to download the dataset yourself (instructions below)
-│
-├── models/
-│   └── next_week_model.joblib  # Trained ML model
-│
-├── requirements.txt
-└── README.md
 
-**📊 Dataset Instructions**
+**Dataset Instructions**
 Dataset Used: This project uses weekly NFL player statistics from nfl_data_py, specifically:
 
 - weekly_player_stats_offense.csv
@@ -105,13 +77,13 @@ Features:
 **Train the Model**
 python -m engine.ml.train
 
-
 This creates:
 models/next_week_model.joblib
 
-**▶️ Running the App**
+**Running the App**
 - Start Streamlit
 From the project root:
 streamlit run app/streamlit_app.py
 Open the local URL shown in the terminal.
+
 
