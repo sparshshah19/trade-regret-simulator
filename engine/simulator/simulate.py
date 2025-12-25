@@ -156,18 +156,22 @@ def counterfactual_replay(
         start_week=start_week,
         end_week=end_week,
     )
-
+    
+    #calculating weekly_delta
     weekly_delta = []
+
+    #learned that zip pairs up elem into tuples 
+    weekly_delta = [with_ - without_ for with_, without_ in zip(weekly_with, weekly_without)]
+
+    #computing cumulative_delta
     cumulative_delta = []
     running = 0.0
 
-    for i in range(len(weekly_with)):
-        d = weekly_with[i] - weekly_without[i]
-        weekly_delta.append(d)
-
+    for d in weekly_delta:
         running += d
         cumulative_delta.append(running)
 
+    #returning
     result = {
         "weekly_with_trade": weekly_with,
         "weekly_without_trade": weekly_without,
@@ -178,3 +182,4 @@ def counterfactual_replay(
         "lineups_without_trade": lineups_without,
     }
     return result
+

@@ -1,12 +1,8 @@
 import pandas as pd
 
-def load_weekly_csv(path: str = "data/weekly.csv") -> pd.DataFrame:
-    """
-    Loads the weekly player dataset into a pandas DataFrame and keeps only columns we need.
+import pandas as pd
 
-    Expected columns in the CSV (based on your dataset):
-    season, week, player_id, player_name, position, fantasy_points_ppr
-    """
+def load_weekly_csv(path: str = "dataset/weekly.csv") -> pd.DataFrame:
     df = pd.read_csv(path)
 
     needed_cols = [
@@ -19,14 +15,11 @@ def load_weekly_csv(path: str = "data/weekly.csv") -> pd.DataFrame:
     ]
     df = df[needed_cols].copy()
 
-    # Normalize types (so keys are consistent)
     df["season"] = df["season"].astype(int)
     df["week"] = df["week"].astype(int)
     df["player_id"] = df["player_id"].astype(str)
     df["player_name"] = df["player_name"].astype(str)
     df["position"] = df["position"].astype(str)
-
-    # Missing points -> treat as 0.0 (player did not score / did not play / missing data)
     df["fantasy_points_ppr"] = df["fantasy_points_ppr"].fillna(0.0).astype(float)
 
     return df
@@ -84,3 +77,15 @@ def get_season_week_range(df: pd.DataFrame, season: int):
     min_week = int(season_df["week"].min())
     max_week = int(season_df["week"].max())
     return min_week, max_week
+
+def find_player_id_by_name(df, name: str):
+    matches = df[df["player_name"].str.lower() == name.lower()]
+    if matches.empty:
+        raise ValueError(f"No player found for name={name}")
+    return matches.iloc[0]["player_id"] #learned that iloc is pandas' integer-location indexer
+
+
+#ex. so df.iloc[0:3] -> rows 0-2 
+#ex. df.iloc[1,2] -> row 1, col 2 
+#ex. df.iloc [:, 1] -> col 2 
+

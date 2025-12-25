@@ -1,4 +1,4 @@
-from src.loading_data.load import load_weekly_csv, build_weekly_indexes, get_season_week_range
+from engine.loading_data.load import load_weekly_csv, build_weekly_indexes, get_season_week_range
 from simulator.simulate import Trade, counterfactual_replay
 
 def main():
