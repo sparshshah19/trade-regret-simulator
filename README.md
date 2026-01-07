@@ -1,5 +1,7 @@
 **TradeZone — Fantasy Football Trade Regret Simulator (with ML)**
 
+Demo Video: https://youtu.be/mZyXyZR802U
+
 TradeZone is an end-to-end fantasy football trade analysis system that lets users replay the rest of a season with and without a trade, using either:
 - Historical outcomes (what actually happened), or
 - Machine-learning predictions (what was expected to happen)
@@ -84,6 +86,7 @@ models/next_week_model.joblib
 - Start Streamlit 
 - From the project root: streamlit run app/streamlit_app.py
 - Open the local URL shown in the terminal.
+
 
 
 
